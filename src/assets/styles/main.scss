@@ -1,0 +1,12 @@
+@import 'css-reset-and-normalize';
+@import 'var.scss';
+body {
+  font: 12px/16px 'Open Sans';
+  color: $black;
+  font-weight: 400;
+}
+.content {
+  width: 100%;
+  max-width: 1110px;
+  margin: 0 auto;
+}

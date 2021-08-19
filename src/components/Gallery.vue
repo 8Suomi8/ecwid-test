@@ -20,14 +20,15 @@
         <img :src="navIcon" class="slider__icon" />
       </button>
       <div class="slider__pagination">
-        <div
+        <button
           :class="[
             'slider__pagination-item',
-            { slider__pagination_active: index == sliderActive },
+            { 'slider__pagination-item_active': index == sliderActive },
           ]"
           v-for="(slide, index) in sliderList"
           :key="`pagination-${index}`"
-        ></div>
+          @click="slideTo(index)"
+        ></button>
       </div>
     </div>
   </div>
@@ -39,9 +40,6 @@
     name: 'Gallery',
     components: {},
     props: {},
-    setup() {
-      return {};
-    },
     data() {
       return {
         navIcon,
@@ -49,46 +47,49 @@
           { img: require('@/assets/img/banner.png') },
           { img: require('@/assets/img/banner.png') },
           { img: require('@/assets/img/banner.png') },
+          { img: require('@/assets/img/banner.png') },
+          { img: require('@/assets/img/banner.png') },
         ],
-        sliderActive: 1,
-        sliderTranslate: 0,
+        sliderActive: 0,
+        sliderWidth: 0,
       };
     },
     computed: {
       sliderCount() {
-        return this.sliderList.length;
+        return this.sliderList.length - 1;
       },
-      sliderWidth() {
-        const slider = this.$el.querySelector('.slider');
-        return slider.offsetWidth;
+      sliderTranslate() {
+        return -this.sliderWidth * this.sliderActive;
       },
-    },
-    watch: {
-      sliderActive: function() {},
     },
     methods: {
-      initSlider: function() {},
+      getSliderSize: function() {
+        const slider = this.$el.querySelector('.slider');
+        this.sliderWidth = slider.offsetWidth;
+      },
       nextSlide: function() {
         if (this.sliderActive < this.sliderCount) {
           this.sliderActive += 1;
-          this.sliderTranslate -= this.sliderWidth;
-        } else {
-          this.sliderActive = 1;
-          this.sliderTranslate = 0;
+          return;
         }
+        this.sliderActive = 0;
       },
       prevSlide: function() {
-        if (this.sliderActive > 1) {
+        if (this.sliderActive > 0) {
           this.sliderActive -= 1;
-          this.sliderTranslate += this.sliderWidth;
-        } else {
-          this.sliderActive = this.sliderCount;
-          this.sliderTranslate = -(this.sliderCount - 1) * this.sliderWidth;
+          return;
         }
+        this.sliderActive = this.sliderCount;
+      },
+      slideTo: function(index) {
+        this.sliderActive = index;
       },
     },
     mounted() {
-      this.initSlider();
+      this.getSliderSize();
+      window.addEventListener('resize', () => {
+        this.getSliderSize();
+      });
     },
   };
 </script>
@@ -97,23 +98,21 @@
   @import '@/assets/styles/var.scss';
   .slider {
     width: 100%;
-    height: 400px;
     display: flex;
     align-items: center;
     position: relative;
     overflow: hidden;
     &__wrapper {
       display: flex;
-      height: 100%;
+      width: 100%;
       position: relative;
       transition: all 0.3s ease-in-out;
     }
     &__slide {
-      height: 100%;
+      width: 100%;
       flex-shrink: 0;
       img {
         width: 100%;
-        height: 100%;
       }
     }
     &__nav {
@@ -141,6 +140,42 @@
     &__icon {
       width: 7px;
       height: 12px;
+    }
+    &__pagination {
+      position: absolute;
+      display: flex;
+      align-self: flex-end;
+      z-index: 2;
+      width: 100%;
+      justify-content: center;
+      padding-bottom: 25px;
+    }
+    &__pagination-item {
+      display: block;
+      outline: none;
+      border: none;
+      cursor: pointer;
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      transition: all 0.3s ease-in-out;
+      border-radius: 50%;
+      margin: 0 15px;
+      padding: 0;
+      &_active {
+        background: $baseColor;
+      }
+    }
+  }
+  @media (max-width: 768px) {
+    .slider {
+      padding-bottom: 40px;
+      &__pagination {
+        bottom: 0;
+      }
+      &__pagination-item {
+        border: 1px solid $baseColor;
+      }
     }
   }
 </style>
